@@ -24,6 +24,8 @@ jobs:
       - name: Install test dependencies
         run: |
           npm ci
+          npx playwright install --with-deps
+          
 
       - name: Run tests
         run: |
