@@ -1,0 +1,30 @@
+name: Run Checks on PR
+
+on:
+  workflow_dispatch:
+  push:
+
+env:
+  CI: development
+  SITE_DIR: public
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install test dependencies
+        run: |
+          npm ci
+
+      - name: Run tests
+        run: |
+          npx tailwindcss -h
