@@ -4,10 +4,6 @@ on:
   workflow_dispatch:
   push:
 
-env:
-  CI: development
-  SITE_DIR: public
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -22,11 +18,13 @@ jobs:
           node-version: lts/*
 
       - name: Install test dependencies
-        run: |
-          npm ci
-          npx playwright install --with-deps
-          
+        run: npm ci
 
-      - name: Run tests
+      - name: Use local action
+        uses: ./
+        with:
+          version: 'v3.3.5'
+
+      - name: Verify Tailwind installation
         run: |
-          npx tailwindcss -h
+          tailwindcss -v

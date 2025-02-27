@@ -1,0 +1,14 @@
+name: 'Setup Tailwind CSS'
+description: 'Install Tailwind CSS CLI binary'
+inputs:
+  version:
+    description: 'Version of Tailwind CSS to install'
+    required: true
+    default: 'v4.0.9'
+  architecture:
+    description: 'Target architecture (linux-x64, linux-arm64, macos-arm64). If not specified, will be auto-detected.'
+    required: false
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
