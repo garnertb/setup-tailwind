@@ -27,4 +27,4 @@ jobs:
 
       - name: Verify Tailwind installation
         run: |
-          tailwindcss -v
+          tailwindcss -h
