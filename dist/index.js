@@ -30108,52 +30108,54 @@ module.exports = parseParams
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-const core = __nccwpck_require__(7484);
-const tc = __nccwpck_require__(3472);
-const fs = __nccwpck_require__(9896);
-const os = __nccwpck_require__(857);
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+var exports = __webpack_exports__;
 
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core_1 = __nccwpck_require__(7484);
+const tool_cache_1 = __nccwpck_require__(3472);
+const fs_1 = __nccwpck_require__(9896);
+const os_1 = __nccwpck_require__(857);
 function detectArchitecture() {
-    const platform = os.platform();
-    const arch = os.arch();
-    
-    if (platform === 'darwin') {
-        return arch === 'arm64' ? 'macos-arm64' : 'macos-x64';
+    const currentPlatform = (0, os_1.platform)();
+    const currentArch = (0, os_1.arch)();
+    if (currentPlatform === 'darwin') {
+        return currentArch === 'arm64' ? 'macos-arm64' : 'macos-x64';
     }
-    
-    if (platform === 'linux') {
-        return arch === 'arm64' ? 'linux-arm64' : 'linux-x64';
+    if (currentPlatform === 'linux') {
+        return currentArch === 'arm64' ? 'linux-arm64' : 'linux-x64';
     }
-    
-    throw new Error(`Unsupported platform: ${platform}`);
+    throw new Error(`Unsupported platform: ${currentPlatform}`);
 }
-
 async function run() {
     try {
-        const version = core.getInput('version');
-        const arch = core.getInput('architecture') || detectArchitecture();
-        
+        const version = (0, core_1.getInput)('version');
+        const arch = (0, core_1.getInput)('architecture') || detectArchitecture();
         console.log(`Using architecture: ${arch}`);
-        
         const downloadUrl = `https://github.com/tailwindlabs/tailwindcss/releases/download/${version}/tailwindcss-${arch}`;
-        
         console.log(`Downloading Tailwind CSS from ${downloadUrl}`);
-        
-        const downloadPath = await tc.downloadTool(downloadUrl);
+        const downloadPath = await (0, tool_cache_1.downloadTool)(downloadUrl);
         const binPath = '/usr/local/bin/tailwindcss';
-        
         // Make executable and move to PATH
-        fs.chmodSync(downloadPath, '755');
-        fs.renameSync(downloadPath, binPath);
-        
+        (0, fs_1.chmodSync)(downloadPath, '755');
+        (0, fs_1.renameSync)(downloadPath, binPath);
         console.log('Tailwind CSS installed successfully');
-        core.addPath('/usr/local/bin');
-    } catch (error) {
-        core.setFailed(error.message);
+        (0, core_1.addPath)('/usr/local/bin');
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            (0, core_1.setFailed)(error.message);
+        }
+        else {
+            (0, core_1.setFailed)('An unknown error occurred');
+        }
     }
 }
-
 run();
+
+})();
 
 module.exports = __webpack_exports__;
 /******/ })()
