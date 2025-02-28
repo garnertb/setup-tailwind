@@ -8,7 +8,14 @@ inputs:
   architecture:
     description: 'Target architecture (linux-x64, linux-arm64, macos-arm64). If not specified, will be auto-detected.'
     required: false
-
+  install-dir:
+    description: 'Directory to install the Tailwind CSS binary to'
+    required: false
+    default: '/usr/local/bin'
+  binary-name:
+    description: 'Name of the Tailwind CSS binary file'
+    required: false
+    default: 'tailwindcss'
 runs:
   using: 'node20'
   main: 'dist/index.js'

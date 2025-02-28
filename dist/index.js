@@ -1,6 +1,102 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 3733:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getDownloadUrl = getDownloadUrl;
+exports.installTailwind = installTailwind;
+const tool_cache_1 = __nccwpck_require__(3472);
+const fs_1 = __nccwpck_require__(9896);
+const core_1 = __nccwpck_require__(7484);
+const path_1 = __nccwpck_require__(6928);
+/**
+ * Creates download URL for Tailwind CSS CLI
+ * @param version The version of Tailwind to download
+ * @param arch The target architecture
+ * @returns The download URL
+ */
+function getDownloadUrl(version, arch) {
+    return `https://github.com/tailwindlabs/tailwindcss/releases/download/${version}/tailwindcss-${arch}`;
+}
+/**
+ * Downloads and installs Tailwind CSS CLI
+ * @param version The version to install
+ * @param arch The target architecture
+ * @param options Installation options
+ * @returns The path to the installed binary
+ */
+async function installTailwind(version, arch, options = {}) {
+    const { installDir = '/usr/local/bin', binaryName = 'tailwindcss' } = options;
+    // Ensure installation directory exists
+    if (!(0, fs_1.existsSync)(installDir)) {
+        // Create the directory with recursive option
+        (0, fs_1.mkdirSync)(installDir, { recursive: true });
+    }
+    const downloadUrl = getDownloadUrl(version, arch);
+    console.log(`Downloading Tailwind CSS from ${downloadUrl}`);
+    const downloadPath = await (0, tool_cache_1.downloadTool)(downloadUrl);
+    const binPath = (0, path_1.join)(installDir, binaryName);
+    // Make executable and move to PATH
+    (0, fs_1.chmodSync)(downloadPath, '755');
+    (0, fs_1.renameSync)(downloadPath, binPath);
+    console.log(`Tailwind CSS installed successfully to ${binPath}`);
+    (0, core_1.addPath)(installDir);
+    return binPath;
+}
+
+
+/***/ }),
+
+/***/ 5634:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.detectArchitecture = detectArchitecture;
+const os_1 = __nccwpck_require__(857);
+class DarwinHandler {
+    canHandle(platform) {
+        return platform === 'darwin';
+    }
+    getArchitecture(arch) {
+        return arch === 'arm64' ? 'macos-arm64' : 'macos-x64';
+    }
+}
+class LinuxHandler {
+    canHandle(platform) {
+        return platform === 'linux';
+    }
+    getArchitecture(arch) {
+        return arch === 'arm64' ? 'linux-arm64' : 'linux-x64';
+    }
+}
+/**
+ * Detects the current system architecture
+ * @returns The detected architecture string
+ * @throws Error if the platform is unsupported
+ */
+function detectArchitecture() {
+    const handlers = [
+        new DarwinHandler(),
+        new LinuxHandler()
+    ];
+    const currentPlatform = (0, os_1.platform)();
+    const currentArch = (0, os_1.arch)();
+    const handler = handlers.find(h => h.canHandle(currentPlatform));
+    if (!handler) {
+        throw new Error(`Unsupported platform: ${currentPlatform}`);
+    }
+    return handler.getArchitecture(currentArch);
+}
+
+
+/***/ }),
+
 /***/ 4914:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -30114,35 +30210,26 @@ var __webpack_exports__ = {};
 var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = run;
 const core_1 = __nccwpck_require__(7484);
-const tool_cache_1 = __nccwpck_require__(3472);
-const fs_1 = __nccwpck_require__(9896);
-const os_1 = __nccwpck_require__(857);
-function detectArchitecture() {
-    const currentPlatform = (0, os_1.platform)();
-    const currentArch = (0, os_1.arch)();
-    if (currentPlatform === 'darwin') {
-        return currentArch === 'arm64' ? 'macos-arm64' : 'macos-x64';
-    }
-    if (currentPlatform === 'linux') {
-        return currentArch === 'arm64' ? 'linux-arm64' : 'linux-x64';
-    }
-    throw new Error(`Unsupported platform: ${currentPlatform}`);
-}
+const platform_utils_1 = __nccwpck_require__(5634);
+const installer_1 = __nccwpck_require__(3733);
 async function run() {
     try {
         const version = (0, core_1.getInput)('version');
-        const arch = (0, core_1.getInput)('architecture') || detectArchitecture();
+        const arch = (0, core_1.getInput)('architecture') || (0, platform_utils_1.detectArchitecture)();
+        // Parse optional installation parameters
+        const installDir = (0, core_1.getInput)('install-dir') || '/usr/local/bin';
+        const binaryName = (0, core_1.getInput)('binary-name') || 'tailwindcss';
         console.log(`Using architecture: ${arch}`);
-        const downloadUrl = `https://github.com/tailwindlabs/tailwindcss/releases/download/${version}/tailwindcss-${arch}`;
-        console.log(`Downloading Tailwind CSS from ${downloadUrl}`);
-        const downloadPath = await (0, tool_cache_1.downloadTool)(downloadUrl);
-        const binPath = '/usr/local/bin/tailwindcss';
-        // Make executable and move to PATH
-        (0, fs_1.chmodSync)(downloadPath, '755');
-        (0, fs_1.renameSync)(downloadPath, binPath);
-        console.log('Tailwind CSS installed successfully');
-        (0, core_1.addPath)('/usr/local/bin');
+        console.log(`Installing to: ${installDir}/${binaryName}`);
+        // Configure installation options
+        const options = {
+            installDir,
+            binaryName
+        };
+        // Install Tailwind CSS CLI
+        await (0, installer_1.installTailwind)(version, arch, options);
     }
     catch (error) {
         if (error instanceof Error) {
@@ -30153,7 +30240,10 @@ async function run() {
         }
     }
 }
-run();
+// Execute when called directly
+if (require.main === require.cache[eval('__filename')]) {
+    run();
+}
 
 })();
 
